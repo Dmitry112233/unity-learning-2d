@@ -43,6 +43,7 @@ namespace Player.Scripts.Bullet
             gameObject.SetActive(false);
             _rigidbody.velocity = Vector2.zero;
             transform.rotation = Quaternion.identity;
+            transform.position = _pool.SpawnPoint.position;
         }
         
         private IEnumerator LifeTimer()

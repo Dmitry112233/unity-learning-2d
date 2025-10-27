@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,6 +9,8 @@ namespace Player.Scripts.Bullet
         [SerializeField] private int initialPoolSize;
         [SerializeField] private Transform spawnPoint;
         
+        public Transform SpawnPoint => spawnPoint;
+
         private Queue<IPoolable> _pool = new ();
 
         private void Start()
@@ -52,7 +53,6 @@ namespace Player.Scripts.Bullet
         public void ReturnObject(IPoolable obj)
         {
             obj.Reset();
-            ((MonoBehaviour)obj).transform.position = spawnPoint.position;
             _pool.Enqueue(obj);
         }
     }
