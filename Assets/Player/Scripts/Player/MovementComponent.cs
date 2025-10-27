@@ -5,6 +5,8 @@ namespace Player.Scripts.Player
 {
     public class MovementComponent : MonoBehaviour
     {
+        public event Action<int> OnDirectionChanged;
+        
         [SerializeField] private float speed = 5;
         [SerializeField] private float jumpHeight = 3;
         
@@ -12,6 +14,7 @@ namespace Player.Scripts.Player
         private bool _bIsJumpRequested;
         private float _moveInput;
         private bool _bIsGrounded;
+        private int _lastDirection = 1;
         
         private Rigidbody2D _rb;
         private GroundCheck _groundCheck;
@@ -42,8 +45,6 @@ namespace Player.Scripts.Player
         {
             HandleMoveInput();
             HandleJumpInput();
-            
-            ApplyFlip();
         }
 
         private void FixedUpdate()
@@ -56,6 +57,18 @@ namespace Player.Scripts.Player
         {
             _moveInput = Input.GetAxisRaw("Horizontal");
             _animator.SetFloat("Move", Math.Abs(_moveInput));
+            
+            if (_moveInput != 0)
+            {
+                int newDir = _moveInput > 0 ? 1 : -1;
+                if (newDir != _lastDirection)
+                {
+                    _lastDirection = newDir;
+                    ApplyFlip(newDir);
+
+                    OnDirectionChanged?.Invoke(_lastDirection);
+                }
+            }
         }
         
         private void HandleJumpInput()
@@ -81,17 +94,12 @@ namespace Player.Scripts.Player
             }
         }
         
-        private void ApplyFlip()
+        private void ApplyFlip(int direction)
         { 
-            if (_moveInput > 0)
-            {
-                _spriteRenderer.flipX = false;
-            }
-            else if (_moveInput < 0)
-            {
-                _spriteRenderer.flipX = true;
-            }
+            _spriteRenderer.flipX = direction < 0;
         }
+        
+        public int GetCurrentDirection() => _lastDirection;
         
         private void HandleGroundedChanged(bool isGrounded)
         {

@@ -13,13 +13,13 @@ GameObject:
   - component: {fileID: 5155854013130906669}
   - component: {fileID: 5001332984743050470}
   - component: {fileID: 6521781713652251491}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: AirEnemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &7797397415633704233
 Transform:
   m_ObjectHideFlags: 0
@@ -155,5 +155,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1a65f121822448b0bea13cc8d90a247, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  distance: 5
-  speed: 1
+  speedMultiplier: 0.1
