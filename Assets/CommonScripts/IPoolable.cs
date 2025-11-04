@@ -1,6 +1,6 @@
-using UnityEngine;
+using Player.Scripts.Bullet;
 
-namespace Player.Scripts.Bullet
+namespace CommonScripts
 {
     public interface IPoolable
     {

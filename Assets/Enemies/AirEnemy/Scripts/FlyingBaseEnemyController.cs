@@ -1,6 +1,7 @@
+using CommonScripts;
 using Enemies.Scripts;
+using Player.Scripts.Bullet;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Enemies.AirEnemy.Scripts
 {
@@ -11,26 +12,28 @@ namespace Enemies.AirEnemy.Scripts
         
         private float _amplitude = 5;
     
-        private Vector3 _startPosition;
         private SpriteRenderer _spriteRenderer;
         private float _lastX;
 
-        private void Awake()
-        {
-            _spriteRenderer =  GetComponent<SpriteRenderer>();
-        }
-
-        void Start()
-        {
-            _startPosition = transform.position;
-        }
-
         void Update()
         {
+            _localTime += Time.deltaTime;
             Move();
             Rotate();
         }
+
+        public override void Initialize(PoolObject pool)
+        {
+            base.Initialize(pool);
+            _spriteRenderer =  GetComponent<SpriteRenderer>();
+        }
         
+        public override void Reset()
+        {
+            base.Reset();
+            _startPosition = Vector3.zero;
+        }
+
         public override void Initialize(EnemyConfigBase config)
         {
             base.Initialize(config);
@@ -47,7 +50,7 @@ namespace Enemies.AirEnemy.Scripts
 
         private void Move()
         {
-            float t = Time.time * _speed * speedMultiplier;
+            float t = _localTime * _speed * speedMultiplier;
             float offsetX = Mathf.Sin(t) * _patrolDistance;
             float offsetY = Mathf.Sin(t * 2f) * _amplitude;
             transform.position = _startPosition + new Vector3(offsetX, offsetY, 0);

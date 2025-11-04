@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using CommonScripts;
+using Player.Scripts.Bullet;
 using UnityEngine;
 
 namespace Enemies.Scripts
@@ -8,15 +11,15 @@ namespace Enemies.Scripts
     {
         [SerializeField] private List<EnemyConfigBase> groundEnemyConfigs;
         [SerializeField] private List<FlyingEnemyConfig> flightEnemyConfigs;
-
-        private GameObject _parentAllEnemies;
+        
+        Dictionary<(EnemyType, EnemyStrength), PoolObject> _enemyPools;
 
         private void Start()
         {
-            _parentAllEnemies = new GameObject("AllEnemies");
+            _enemyPools = new Dictionary<(EnemyType, EnemyStrength), PoolObject>();
         }
 
-        public GameObject Create(EnemyType type, EnemyStrength strength, Vector3 position)
+        public BaseEnemyController Create(EnemyType type, EnemyStrength strength, Vector3 position)
         {
             EnemyConfigBase selectedConfig = null;
         
@@ -35,10 +38,16 @@ namespace Enemies.Scripts
                 Debug.LogError($"No config found for {type} with {strength}");
                 return null;
             }
-        
-            GameObject enemy = Instantiate(selectedConfig.prefab, position, Quaternion.identity);
-        
-            enemy.transform.parent = _parentAllEnemies.transform;
+            
+            var key = (type, strength);
+            
+            if (!_enemyPools.TryGetValue(key, out var pool))
+            {
+                pool = CreatePool(selectedConfig.prefab, key);
+                _enemyPools[key] = pool;
+            }
+            
+            var enemy = pool.GetObject(position) as MonoBehaviour;
         
             if (enemy.TryGetComponent<IEnemy>(out var enemyController))
             {
@@ -49,7 +58,17 @@ namespace Enemies.Scripts
                 Debug.LogWarning($"Enemy prefab {enemy.name} does not implement IEnemy");
             }
 
-            return enemy;
+            return enemy.GetComponent<BaseEnemyController>();
+        }
+
+        private PoolObject CreatePool(GameObject prefab, (EnemyType type, EnemyStrength strength) key)
+        {
+            var poolGo = new GameObject($"{key.Item1}_{key.Item2}_Pool");
+            poolGo.transform.SetParent(transform);
+            
+            var pool = poolGo.AddComponent<PoolObject>();
+            pool.Initialize(prefab, poolGo.transform, initialSize: 10);
+            return pool;
         }
     }
 

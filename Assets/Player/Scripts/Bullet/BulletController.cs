@@ -1,4 +1,6 @@
 using System.Collections;
+using CommonScripts;
+using Enemies.Scripts;
 using UnityEngine;
 
 namespace Player.Scripts.Bullet
@@ -12,10 +14,20 @@ namespace Player.Scripts.Bullet
         private Coroutine _lifeCoroutine;
         private PoolObject _pool;
 
+        private bool _initialized;
         
         private void Awake()
         {
             _rigidbody = GetComponent<Rigidbody2D>();
+        }
+        
+        private void OnEnable()
+        {
+            if (_initialized)
+            {
+                if (_lifeCoroutine != null) StopCoroutine(_lifeCoroutine);
+                _lifeCoroutine = StartCoroutine(LifeTimer());
+            }
         }
 
         public void ApplyShoot(int currentDirection)
@@ -30,12 +42,12 @@ namespace Player.Scripts.Bullet
         public void Initialize(PoolObject pool)
         {
             _pool = pool;
-            gameObject.SetActive(true);
-            _rigidbody.velocity = Vector2.zero;
+            if (_rigidbody == null)
+                _rigidbody = GetComponent<Rigidbody2D>();
             
-            if (_lifeCoroutine != null)
-                StopCoroutine(_lifeCoroutine);
-            _lifeCoroutine = StartCoroutine(LifeTimer());
+            _rigidbody.velocity = Vector2.zero;
+            _initialized = true;
+            gameObject.SetActive(true);
         }
 
         public void Reset()
@@ -43,7 +55,6 @@ namespace Player.Scripts.Bullet
             gameObject.SetActive(false);
             _rigidbody.velocity = Vector2.zero;
             transform.rotation = Quaternion.identity;
-            transform.position = _pool.SpawnPoint.position;
         }
         
         private IEnumerator LifeTimer()
@@ -55,7 +66,20 @@ namespace Player.Scripts.Bullet
         void OnDisable()
         {
             if (_lifeCoroutine != null)
+            {
                 StopCoroutine(_lifeCoroutine);
+                _lifeCoroutine = null;
+            }
+            _initialized = false;
+        }
+
+        private void OnCollisionEnter2D(Collision2D collision)
+        {
+            if (collision.collider.TryGetComponent<BaseEnemyController>(out var enemy))
+            {
+                enemy.TakeHit();
+                _pool.ReturnObject(this);
+            }
         }
     }
 }

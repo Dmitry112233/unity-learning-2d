@@ -1,4 +1,5 @@
 using System;
+using CommonScripts;
 using Player.Scripts.Bullet;
 using UnityEngine;
 
@@ -7,6 +8,7 @@ namespace Player.Scripts.Player
     public class FireComponent : MonoBehaviour
     {
         [SerializeField] private PoolObject bulletPool;
+        [SerializeField] private Transform spawnPoint;
 
         private int _currentDirection = 1;
         private MovementComponent _movementComponent;
@@ -40,7 +42,7 @@ namespace Player.Scripts.Player
         {
             if (Input.GetMouseButtonDown(0))
             {
-                var bullet = bulletPool.GetBullet() as BulletController;
+                var bullet = bulletPool.GetObject(spawnPoint.position) as BulletController;
                 bullet?.ApplyShoot(_currentDirection);
             }
         }
